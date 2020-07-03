@@ -1,0 +1,48 @@
+version: '3'
+
+services:
+  jobscheduler-master:
+    build:
+      context: jobscheduler_master
+    depends_on:
+      - db
+    environment:
+      DB_SERVER_HOST: ${DB_SERVER_HOST}
+      DB_SERVER_PORT: ${DB_SERVER_PORT}
+      DB_SERVER_DATABASE: ${DB_SERVER_DATABASE}
+      DB_SERVER_USER: ${DB_SERVER_USER}
+      DB_SERVER_PASSWORD: ${DB_SERVER_PASSWORD}
+    volumes:
+      - ./jobscheduler_data:/mnt/jobscheduler/data
+    ports:
+      - 40444:40444
+  jobscheduler-joc-cockpit:
+    build:
+      context: jobscheduler_joc_cockpit
+    depends_on:
+      - db
+      - jobscheduler-master
+    environment:
+      DB_SERVER_HOST: ${DB_SERVER_HOST}
+      DB_SERVER_PORT: ${DB_SERVER_PORT}
+      DB_SERVER_DATABASE: ${DB_SERVER_DATABASE}
+      DB_SERVER_USER: ${DB_SERVER_USER}
+      DB_SERVER_PASSWORD: ${DB_SERVER_PASSWORD}
+    ports:
+      - 40446:40446
+      - 4446:4446
+  jobscheduler-agent:
+    build:
+      context: jobscheduler_agent
+    ports:
+      - 4445:4445
+
+  db:
+    image: mariadb:latest
+    environment:
+      MYSQL_USER: ${DB_SERVER_USER}
+      MYSQL_PASSWORD: ${DB_SERVER_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_SERVER_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_SERVER_DATABASE}
+    volumes:
+      - ./db_data:/var/lib/mysql
